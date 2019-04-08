@@ -1,0 +1,180 @@
+﻿<Window x:Class="WeatherHCI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WeatherHCI"
+        xmlns:cmd="clr-namespace:WeatherHCI"
+        xmlns:control = "clr-namespace:WeatherHCI"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        mc:Ignorable="d"
+        Title="Weather HCI" MinHeight="750" Height="750" MinWidth="1200" Width="1200" Name="Main" PreviewKeyDown="Main_PreviewKeyDown" Icon="resources/icon/ftn.png">
+    <Window.CommandBindings>
+        <CommandBinding Command="cmd:MyCommand.ShowFavorites" Executed="ShowFavorites_Executed"></CommandBinding>
+        <CommandBinding Command="cmd:MyCommand.ToggleFavorite" Executed="ToggleFavorite_Executed"></CommandBinding>
+        <CommandBinding Command="cmd:MyCommand.Search" Executed="Search_Executed"></CommandBinding>
+        <CommandBinding Command="cmd:MyCommand.DisplayHourly" Executed="Display_Hourly_Executed"></CommandBinding>
+        <CommandBinding Command="cmd:MyCommand.DisplayGraph" Executed="Display_Graph_Executed"></CommandBinding>
+    </Window.CommandBindings>
+    <Window.Resources>
+        <Style x:Key="NoHover" TargetType="{x:Type Button}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Name="border" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Window.Background>
+        <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+            <GradientStop Color="#FF1386E8" Offset="0.01"/>
+            <GradientStop Color="#FF041440" Offset="1"/>
+        </LinearGradientBrush>
+    </Window.Background>
+
+    <ScrollViewer Name="MainScroll" ScrollViewer.VerticalScrollBarVisibility ="Auto">
+        <DockPanel>
+            <DockPanel DockPanel.Dock="Top" Height="35" Margin="20, 10, 20, 0" Panel.ZIndex="99991">
+                <Button Name="FavoritesBtn" DockPanel.Dock="Left" Style="{StaticResource NoHover}" Click="Favorites_Click" Width="35" BorderBrush="{x:Null}">
+                    <Button.Background>
+                        <ImageBrush ImageSource="resources/icon/favorite_list_fill.png"/>
+                    </Button.Background>
+                    <Button.ToolTip>
+                        <ToolTip>
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold">Show favorites</TextBlock>
+                                <TextBlock>Shows all favorite locations.</TextBlock>
+                                <TextBlock>Shortcut: CTRL+X</TextBlock>
+                            </StackPanel>
+                        </ToolTip>
+                    </Button.ToolTip>
+                </Button>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" FlowDirection="RightToLeft" >
+                    <Button FlowDirection="RightToLeft" Width="35" Height="35" Style="{StaticResource NoHover}" Click="Btn_Get_Forecast">
+                        <Button.Background>
+                            <ImageBrush ImageSource="resources/icon/search.png"/>
+                        </Button.Background>
+                        <Button.ToolTip>
+                            <ToolTip>
+                                <StackPanel FlowDirection="LeftToRight">
+                                    <TextBlock FontWeight="Bold">Search</TextBlock>
+                                    <TextBlock>Lookups up weather information.</TextBlock>
+                                    <TextBlock>Shortcut: CTRL+F</TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </Button.ToolTip>
+                    </Button>
+                    <TextBox VerticalContentAlignment="Center" FlowDirection="LeftToRight" Width="200" Height="30" KeyUp="TextBox_KeyUp" 
+                                 FontSize="16" Name="textBox" Margin="15, 0, 0, 0" Background="White" LostFocus="TextBox_LostFocus" PreviewKeyDown="TextBox_KeyDown" PreviewMouseLeftButtonUp="TextBox_PreviewMouseLeftButtonUp" />
+                </StackPanel>
+            </DockPanel>
+            <DockPanel DockPanel.Dock="Bottom">
+                <StackPanel x:Name="Favorites" x:FieldModifier="public" DockPanel.Dock="Left" Height="Auto" Width="300" Background="#590F0000" Visibility="Collapsed" Margin="20, -35, 0, 0">
+                    <Label FontSize="22" Margin="0, 0, 0, 0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="White" BorderBrush="White" BorderThickness="0,0,0,2">Favorites</Label>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" DockPanel.Dock="Right">
+                    <Border Name="JeffTheBorder" DockPanel.Dock="Bottom" Width="200" Height="65" HorizontalAlignment="Right" Opacity="0" Background="White" Margin="0, 0, 70, 5" LostFocus="ResultStack_LostFocus" PreviewKeyDown="JeffTheBorder_PreviewKeyDown">
+                        <ScrollViewer Name="JeffTheScrollViewer" VerticalScrollBarVisibility="Auto" FontSize="20" PreviewKeyDown="JeffTheScrollViewer_PreviewKeyDown" KeyDown="JeffTheScrollViewer_KeyDown">
+                            <StackPanel Name="resultStack" Width="220" MouseLeftButtonDown="ResultStack_MouseLeftButtonDown" PreviewKeyDown="ResultStack_PreviewKeyDown" KeyDown="ResultStack_KeyDown"/>
+                        </ScrollViewer>
+                    </Border>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 0, 0, 0">
+                        <control:CurrentDisplay x:Name="Current" Width="520" Height="300"></control:CurrentDisplay>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Height="40" />
+                    <StackPanel Name="DailyContainer" Orientation="Horizontal" HorizontalAlignment="Center" Height="240" >
+                        <StackPanel Orientation="Vertical" >
+                            <Label Foreground="White" Margin="0, -30, 0, 0" FontSize="26">Daily</Label>
+                            <control:DayDisplay x:Name="Daily1" Width="200" Height="200" Margin="5" MouseLeftButtonDown="Daily1_MouseLeftButtonDown" />
+                        </StackPanel>
+                        <control:DayDisplay x:Name="Daily2" Width="200" Height="200" Margin="5" MouseLeftButtonDown="Daily2_MouseLeftButtonDown" />
+                        <control:DayDisplay x:Name="Daily3" Width="200" Height="200" Margin="5" MouseLeftButtonDown="Daily3_MouseLeftButtonDown" />
+                        <control:DayDisplay x:Name="Daily4" Width="200" Height="200" Margin="5" MouseLeftButtonDown="Daily4_MouseLeftButtonDown" />
+                        <control:DayDisplay x:Name="Daily5" Width="200" Height="200" Margin="5" MouseLeftButtonDown="Daily5_MouseLeftButtonDown" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Height="40" Width="1034">
+
+                    </StackPanel>
+                    <StackPanel Name="ColumnPanel" Orientation="Horizontal" HorizontalAlignment="Center" Height="290">
+                        <StackPanel Orientation="Vertical">
+                            <Label Name="Hr1Label" Foreground="White" FontSize="16"></Label>
+                            <control:HourlyDisplay x:Name="Hr1" Width="126" Height="180" BorderBrush="White" Margin="2,0,2,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <Label Name="Hr2Label" Foreground="White" FontSize="16"></Label>
+                            <control:HourlyDisplay x:Name="Hr2" Width="126" Height="180" BorderBrush="White" Margin="2,0,2,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <Label Name="Hr3Label" Foreground="White" FontSize="16"></Label>
+                            <control:HourlyDisplay x:Name="Hr3" Width="126" Height="180" BorderBrush="White" Margin="2,0,2,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <Label Name="Hr4Label" Foreground="White" FontSize="16"></Label>
+                            <control:HourlyDisplay x:Name="Hr4" Width="126" Height="180" BorderBrush="White" Margin="2,0,2,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <Label Name="Hr5Label" Foreground="White" FontSize="16"></Label>
+                            <control:HourlyDisplay x:Name="Hr5" Width="126" Height="180" BorderBrush="White" Margin="2,0,2,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <Label Name="Hr6Label" Foreground="White" FontSize="16"></Label>
+                            <control:HourlyDisplay x:Name="Hr6" Width="126" Height="180" BorderBrush="White" Margin="2,0,2,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <Label Name="Hr7Label" Foreground="White" FontSize="16"></Label>
+                            <control:HourlyDisplay x:Name="Hr7" Width="126" Height="180" BorderBrush="White" Margin="2,0,2,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <Label x:Name="Hr8Label" Foreground="White" FontSize="16" Content=""/>
+                                <Button Name="DisplaySwitch" VerticalAlignment="Center" Style="{StaticResource NoHover}" HorizontalAlignment="Right" Width="32" Height="32" Margin="92, -10, 0, 0" Click="DisplaySwitch_Click">
+                                    <Button.Background>
+                                        <ImageBrush ImageSource="resources/icon/graph.png"/>
+                                    </Button.Background>
+                                    <Button.ToolTip>
+                                        <ToolTip>
+                                            <StackPanel FlowDirection="LeftToRight">
+                                                <TextBlock FontWeight="Bold">Graph display</TextBlock>
+                                                <TextBlock>Switch to graph display.</TextBlock>
+                                                <TextBlock>Shortcut: CTRL+G</TextBlock>
+                                            </StackPanel>
+                                        </ToolTip>
+                                    </Button.ToolTip>
+                                </Button>
+                            </StackPanel>
+                            <control:HourlyDisplay x:Name="Hr8" Width="126" Height="180" BorderBrush="White" Margin="2,0,2,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Name="GraphPanel" Visibility="Collapsed" Width="1050">
+                        <Button Name="DisplayCards" VerticalAlignment="Center" Style="{StaticResource NoHover}" HorizontalAlignment="Right" Width="32" Height="32" Margin="0, 0, 0, 0" Click="DisplayCards_Click">
+                            <Button.Background>
+                                <ImageBrush ImageSource="resources/icon/icons8-columns-96.png"/>
+                            </Button.Background>
+                            <Button.ToolTip>
+                                <ToolTip>
+                                    <StackPanel FlowDirection="LeftToRight">
+                                        <TextBlock FontWeight="Bold">Hourly display</TextBlock>
+                                        <TextBlock>Switch to hourly display.</TextBlock>
+                                        <TextBlock>Shortcut: CTRL+H</TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </Button.ToolTip>
+                        </Button>
+                        <lvc:CartesianChart Series="{Binding SeriesCollection}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" LegendLocation="Right" Width="1050" Height="195">
+                            <lvc:CartesianChart.AxisY>
+                                <lvc:Axis Title="Temperature" LabelFormatter="{Binding YFormatter}" FontSize="16" Foreground="White"></lvc:Axis>
+                            </lvc:CartesianChart.AxisY>
+                            <lvc:CartesianChart.AxisX>
+                                <lvc:Axis Title="Time" Labels="{Binding GraphLabels}" Foreground="White" FontSize="16"></lvc:Axis>
+                            </lvc:CartesianChart.AxisX>
+                        </lvc:CartesianChart>
+                    </StackPanel>
+                </StackPanel>
+            </DockPanel>
+        </DockPanel>
+    </ScrollViewer>
+</Window>
