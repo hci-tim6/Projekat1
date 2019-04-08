@@ -61,15 +61,18 @@ namespace WeatherHCI
         {
             InitializeComponent();
 
-            using (StreamReader file = new StreamReader("../../favorites.txt", false))
+            if (File.Exists("../../favorites.txt"))
             {
-                string line;
-                while ((line = file.ReadLine()) != null)
+                using (StreamReader file = new StreamReader("../../favorites.txt", false))
                 {
-                    favoriteSet.Add(line);
-                    addFavBlock(line);
-                }
+                    string line;
+                    while ((line = file.ReadLine()) != null)
+                    {
+                        favoriteSet.Add(line);
+                        addFavBlock(line);
+                    }
 
+                }
             }
 
             dayDisplays = new List<DayDisplay>
