@@ -694,30 +694,35 @@ namespace WeatherHCI
 
         private void Daily1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            dailyIndex = 0;
             DisplayHourly(0);
             SetGraph(0);
         }
 
         private void Daily2_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            dailyIndex = 1;
             DisplayHourly(1);
             SetGraph(1);
         }
 
         private void Daily3_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            dailyIndex = 2;
             DisplayHourly(2);
             SetGraph(2);
         }
 
         private void Daily4_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            dailyIndex = 3;
             DisplayHourly(3);
             SetGraph(3);
         }
 
         private void Daily5_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            dailyIndex = 4;
             DisplayHourly(4);
             SetGraph(4);
         }
